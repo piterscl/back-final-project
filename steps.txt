@@ -1,0 +1,18 @@
+#1 Crear archivo Pipfile
+
+#2 Instalar entorno virtual en terminal
+pinenv --pthyon=3.9 // En windows
+pinenv shell // En Mac
+
+#3 Instalar Flask y librerias
+pipenv install Flask
+pipenv install flask-script flask-migrate flask-cors flask-sqlalchemy pymysql
+
+
+#4 Crear archivo de arranque del proyecto
+app.py 
+from flask import Flask // importar librerias 
+
+#5 Seleccionar espacio virtual para poder seleccionar librerias
+
+ 

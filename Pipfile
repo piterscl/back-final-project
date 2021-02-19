@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-script = "*"
+flask-migrate = "*"
+flask-cors = "*"
+flask-sqlalchemy = "*"
+pymysql = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
+
+[scripts]
+star = "python app.py runserver"
+init = "python app.py db init"
+migrate = "python app.py db migrate"
+upgrade = "python app.py db upgrade"
