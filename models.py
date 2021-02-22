@@ -32,7 +32,7 @@ class User(db.Model):
 
 class Servicios(db.Model):
     __tablename__ = 'servicios'
-    servicio_id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
+    servicio_id = db.Column(db.Integer, primary_key=True, unique=True) #Clave primaria de tabla
     nombre_servicio = db.Column(db.String(200))
     valor_servicio = db.Column(db.String(200))
     agendamientos_servicios = db.relationship('Agendamiento', uselist=False, backref='servicios')
@@ -41,7 +41,7 @@ class Servicios(db.Model):
          return {
              "servicio_id": self.servicio_id,
              "nombre_servicio": self.nombre_servicio,
-             "valor_servicio": self.valor_servicio ,
+             "valor_servicio": self.valor_servicio,
          }
 
     def save(self):
