@@ -24,27 +24,27 @@ jwt = JWTManager(app)
 Migrate(app, db)
 CORS(app)
 manager = Manager(app)
-manager.add_command('db', MigrateCommand)  #init migrate y el upgrade
+manager.add_command('db', MigrateCommand)
 
 @app.route("/")
 def main():
     return render_template('index.html')
 
 
-@app.route("/login", methods=['POST'])
+@app.route("/Login", methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
 
-    if not username: return jsonify({"msg": "nombre de es requerido"}), 400
-    if not password: return jsonify({"msg": "password is required"}), 400
+    if not username: return jsonify({"msg": "username es requerido"}), 400
+    if not password: return jsonify({"msg": "contraseña es requerida"}), 400
 
     user = User.query.filter_by(username=username).first()
-    if not user: return jsonify({"msg": "username/password are incorrect!!!"}), 400
+    if not user: return jsonify({"msg": "username/contraseña incorrectos"}), 400
     
 
     if not check_password_hash(user.password, password):
-        return jsonify({"msg": "username/password are incorrect!!!"}), 400
+        return jsonify({"msg": "nombre/contraseña incorrectos"}), 400
     
     expires = datetime.timedelta(days=1)
 
@@ -62,18 +62,18 @@ def register():
     username = request.json.get('username')
     password = request.json.get('password')
 
-    if not username: return jsonify({"msg": "username is required"}), 400
-    if not password: return jsonify({"msg": "password is required"}), 400
+    if not username: return jsonify({"msg": "username es requiredo"}), 400
+    if not password: return jsonify({"msg": "contraseña es requireda"}), 400
 
     user = User.query.filter_by(username=username).first()
-    if user: return jsonify({"msg": "username already exists!!!"}), 400
+    if user: return jsonify({"msg": "username ya existe"}), 400
     
     user = User()
     user.username = username
     user.password = generate_password_hash(password)
     user.save()
 
-    if not user: return jsonify({"msg": "Register Failed!!!"}), 400
+    if not user: return jsonify({"msg": "Falló registro"}), 400
 
     expires = datetime.timedelta(days=3)
 
@@ -87,7 +87,7 @@ def register():
     return jsonify(data), 200
 
 
-@app.route("/perfil", methods=['GET'])
+@app.route("/Profile", methods=['GET'])
 @jwt_required()
 def profile():
     id = get_jwt_identity()
