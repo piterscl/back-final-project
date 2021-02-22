@@ -132,5 +132,33 @@ def crearServicio():
 
     return jsonify(data), 200
 
+#/Extras
+@app.route("/API/Extras", methods=['POST'])
+def crearExtras():
+    extras_id = request.json.get('extras_id')
+    nombre_extra = request.json.get('nombre_extra')
+    valor_extra = request.json.get('valor_extra')
+
+    if not extras_id: return jsonify({"msg": "id extra es requerido"}), 400
+    if not nombre_extra: return jsonify({"msg": "nombre extra es requerido"}), 400
+    if not valor_extra: return jsonify({"msg": "valor extra es requerido"}), 400
+
+    extra = Extras.query.filter_by(extras_id=extras_id).first()
+    if extra: return jsonify({"msg": "el id ya se encuentra en uso"}), 400
+    
+    extra = Extras()  
+    extra.extras_id = extras_id
+    extra.nombre_extra = nombre_extra
+    extra.valor_extra = valor_extra
+    extra.save()
+
+    if not extra: return jsonify({"msg": "Falló registro"}), 400
+
+    data = {
+        "extras": extra.serialize()
+    }
+
+    return jsonify(data), 200
+
 if __name__ == '__main__':
     manager.run()
