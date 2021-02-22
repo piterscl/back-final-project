@@ -105,11 +105,32 @@ def profile():
     return jsonify(user.serialize()), 200
 
 #/Servicios
-def Servicios():
+@app.route("/API/Servicios", methods=['POST'])
+def crearServicio():
     servicio_id = request.json.get('servicio_id')
     nombre_servicio = request.json.get('nombre_servicio')
     valor_servicio = request.json.get('valor_servicio')
+
+    if not servicio_id: return jsonify({"msg": "id es requerido"}), 400
+    if not nombre_servicio: return jsonify({"msg": "nombre servicio es requerido"}), 400
+    if not valor_servicio: return jsonify({"msg": "valor servicio es requerido"}), 400
+
+    servicio = Servicios.query.filter_by(servicio_id=servicio_id).first()
+    if servicio: return jsonify({"msg": "el id ya se encuentra en uso"}), 400
     
+    servicio = Servicios()  
+    servicio.servicio_id = servicio_id
+    servicio.nombre_servicio = nombre_servicio
+    servicio.valor_servicio = valor_servicio
+    servicio.save()
+
+    if not servicio: return jsonify({"msg": "Falló registro"}), 400
+
+    data = {
+        "servicio": servicio.serialize()
+    }
+
+    return jsonify(data), 200
 
 if __name__ == '__main__':
     manager.run()
