@@ -63,23 +63,23 @@ def register():
     apellido = request.json.get('apellido')
     password = request.json.get('password')
     email = request.json.get('email')
-    telefono = request.json.get('telefono')
+    phone = request.json.get('telefono')
 
     if not username: return jsonify({"msg": "username es requiredo"}), 400
     if not apellido: return jsonify({"msg": "apellido es requiredo"}), 400
     if not password: return jsonify({"msg": "contraseña es requireda"}), 400
     if not email: return jsonify({"msg": "email es requiredo"}), 400
-    if not telefono: return jsonify({"msg": "telefono es requiredo"}), 400
+    if not phone: return jsonify({"msg": "telefono es requiredo"}), 400
 
-    user = User.query.filter_by(username=username).first()
-    if user: return jsonify({"msg": "username ya existe"}), 400
+    user = User.query.filter_by(email=email).first()
+    if user: return jsonify({"msg": "el email ya se encuentra registrado"}), 400
     
     user = User()
     user.username = username
     user.password = generate_password_hash(password)
     user.apellido = apellido
     user.email = email
-    user.telefono = telefono
+    user.phone = phone
     user.save()
 
     if not user: return jsonify({"msg": "Falló registro"}), 400
