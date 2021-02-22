@@ -60,10 +60,16 @@ def login():
 @app.route("/Registro", methods=['POST'])
 def register():
     username = request.json.get('username')
+    apellido = request.json.get('apellido')
     password = request.json.get('password')
+    email = request.json.get('email')
+    telefono = request.json.get('telefono')
 
     if not username: return jsonify({"msg": "username es requiredo"}), 400
+    if not apellido: return jsonify({"msg": "apellido es requiredo"}), 400
     if not password: return jsonify({"msg": "contraseña es requireda"}), 400
+    if not email: return jsonify({"msg": "email es requiredo"}), 400
+    if not telefono: return jsonify({"msg": "telefono es requiredo"}), 400
 
     user = User.query.filter_by(username=username).first()
     if user: return jsonify({"msg": "username ya existe"}), 400
@@ -71,11 +77,14 @@ def register():
     user = User()
     user.username = username
     user.password = generate_password_hash(password)
+    user.apellido = apellido
+    user.email = email
+    user.telefono = telefono
     user.save()
 
     if not user: return jsonify({"msg": "Falló registro"}), 400
 
-    expires = datetime.timedelta(days=3)
+    expires = datetime.timedelta(days=1)
 
     access_token = create_access_token(identity=user.id, expires_delta=expires)
 
