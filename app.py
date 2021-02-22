@@ -6,7 +6,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-from models import db, User
+from models import db, User, Servicios, Horarios, Extras
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,7 +31,7 @@ def main():
     return render_template('index.html')
 
 
-@app.route("/api/login", methods=['POST'])
+@app.route("/login", methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -46,7 +46,7 @@ def login():
     if not check_password_hash(user.password, password):
         return jsonify({"msg": "username/password are incorrect!!!"}), 400
     
-    expires = datetime.timedelta(days=3)
+    expires = datetime.timedelta(days=1)
 
     access_token = create_access_token(identity=user.id, expires_delta=expires)
 
@@ -57,7 +57,7 @@ def login():
 
     return jsonify(data), 200
 
-@app.route("/api/Registro", methods=['POST'])
+@app.route("/Registro", methods=['POST'])
 def register():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -87,7 +87,7 @@ def register():
     return jsonify(data), 200
 
 
-@app.route("/api/perfil", methods=['GET'])
+@app.route("/perfil", methods=['GET'])
 @jwt_required()
 def profile():
     id = get_jwt_identity()
