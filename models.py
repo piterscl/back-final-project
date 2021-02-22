@@ -82,7 +82,7 @@ class Horarios(db.Model):
 
 class Extras(db.Model):
     __tablename__ = 'extras'
-    extras_id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
+    extras_id = db.Column(db.Integer, primary_key=True, unique=True) #Clave primaria de tabla
     valor_extra = db.Column(db.String(200))
     nombre_extra = db.Column(db.String(200))
     agendamientos_extras = db.relationship('Agendamiento', backref='extras')
