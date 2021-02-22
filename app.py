@@ -30,7 +30,7 @@ manager.add_command('db', MigrateCommand)
 def main():
     return render_template('index.html')
 
-
+#Login
 @app.route("/Login", methods=['POST'])
 def login():
     username = request.json.get('username')
@@ -57,6 +57,7 @@ def login():
 
     return jsonify(data), 200
 
+#/Registro
 @app.route("/Registro", methods=['POST'])
 def register():
     username = request.json.get('username')
@@ -95,13 +96,20 @@ def register():
 
     return jsonify(data), 200
 
-
+#/Profile
 @app.route("/Profile", methods=['GET'])
 @jwt_required()
 def profile():
     id = get_jwt_identity()
     user = User.query.get(id)
     return jsonify(user.serialize()), 200
+
+#/Servicios
+def Servicios():
+    servicio_id = request.json.get('servicio_id')
+    nombre_servicio = request.json.get('nombre_servicio')
+    valor_servicio = request.json.get('valor_servicio')
+    
 
 if __name__ == '__main__':
     manager.run()
