@@ -64,7 +64,7 @@ def register():
     apellido = request.json.get('apellido')
     password = request.json.get('password')
     email = request.json.get('email')
-    phone = request.json.get('telefono')
+    phone = request.json.get('phone')
 
     if not username: return jsonify({"msg": "username es requiredo"}), 400
     if not apellido: return jsonify({"msg": "apellido es requiredo"}), 400
@@ -159,6 +159,35 @@ def crearExtras():
     }
 
     return jsonify(data), 200
+
+    #/Horarios
+@app.route("/API/Horarios", methods=['POST'])
+def crearHorarios():
+    horarios_id = request.json.get('horarios_id')
+    fechas = request.json.get('fechas')
+    horas = request.json.get('horas')
+
+    if not horarios_id: return jsonify({"msg": "id horario es requerido"}), 400
+    if not fechas: return jsonify({"msg": "fecha es requerido"}), 400
+    if not horas: return jsonify({"msg": "hora es requerido"}), 400
+
+    horario = Horarios.query.filter_by(horarios_id=horarios_id).first()
+    if horario: return jsonify({"msg": "el id ya se encuentra en uso"}), 400
+    
+    horario = Horarios()  
+    horario.horarios_id = horarios_id
+    horario.fechas = datetime.datetime.strptime(fechas,'%d-%m-%Y').date()
+    horario.horas = horas
+    horario.save()
+
+    if not horario: return jsonify({"msg": "Falló registro"}), 400
+
+    data = {
+        "horarios": horario.serialize()
+    }
+
+    return jsonify(data), 200
+
 
 if __name__ == '__main__':
     manager.run()
