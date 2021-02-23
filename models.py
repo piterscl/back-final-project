@@ -58,8 +58,8 @@ class Servicios(db.Model):
 class Horarios(db.Model):
     __tablename__ = 'horarios'
     horarios_id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
-    fechas = db.Column(db.DateTime)
-    horas = db.Column(db.String(200))
+    fechas = db.Column(db.DateTime, nullable=False)
+    horas = db.Column(db.String(200), nullable=False)
     agendamientos_horarios = db.relationship('Agendamiento', uselist=False, backref='horarios')
 
     def serialize(self):
