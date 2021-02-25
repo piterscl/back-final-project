@@ -5,19 +5,34 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(200), nullable=False)
+    apellido = db.Column(db.String(200), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200), nullable=False, unique=True)
     phone = db.Column(db.String(200), nullable=False)
     created = db.Column(db.DateTime(), default=db.func.now())
-    agendamientos_users = db.relationship('Agendamiento', backref='users')
+    agendamiento = db.relationship('Agendamiento', backref='users')
 
     def serialize(self):
          return {
              "id": self.id,
              "username": self.username,
+             "apellido": self.apellido,
              "email": self.email,
              "phone": self.phone,
          }
+    
+    def serialize_with_servicio_extra(self):
+         return {
+             "id": self.id,
+             "username": self.username,
+             "apellido": self.apellido,
+             "email": self.email,
+             "phone": self.phone,
+             "agendamiento": self.get_agendamiento(),
+         }
+
+    def get_agendamiento(self):
+        return list(map(lambda agendamiento: agendamiento.serialize, self.agendamiento))
 
     def save(self):
         db.session.add(self)
@@ -32,14 +47,13 @@ class User(db.Model):
 
 class Servicios(db.Model):
     __tablename__ = 'servicios'
-    servicio_id = db.Column(db.Integer, primary_key=True, unique=True) #Clave primaria de tabla
+    id = db.Column(db.Integer, primary_key=True, unique=True) #Clave primaria de tabla
     nombre_servicio = db.Column(db.String(200))
     valor_servicio = db.Column(db.String(200))
-    agendamientos_servicios = db.relationship('Agendamiento', uselist=False, backref='servicios')
 
     def serialize(self):
          return {
-             "servicio_id": self.servicio_id,
+             "id": self.id,
              "nombre_servicio": self.nombre_servicio,
              "valor_servicio": self.valor_servicio,
          }
@@ -57,14 +71,13 @@ class Servicios(db.Model):
 
 class Horarios(db.Model):
     __tablename__ = 'horarios'
-    horarios_id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
+    id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
     fechas = db.Column(db.DateTime, nullable=False)
     horas = db.Column(db.String(200), nullable=False)
-    agendamientos_horarios = db.relationship('Agendamiento', uselist=False, backref='horarios')
 
     def serialize(self):
          return {
-             "horarios_id": self.horarios_id,
+             "id": self.id,
              "fechas": self.fechas,
              "horas": self.horas ,
          }
@@ -82,14 +95,13 @@ class Horarios(db.Model):
 
 class Extras(db.Model):
     __tablename__ = 'extras'
-    extras_id = db.Column(db.Integer, primary_key=True, unique=True) #Clave primaria de tabla
+    id = db.Column(db.Integer, primary_key=True, unique=True) #Clave primaria de tabla
     valor_extra = db.Column(db.String(200))
     nombre_extra = db.Column(db.String(200))
-    agendamientos_extras = db.relationship('Agendamiento', backref='extras')
 
     def serialize(self):
          return {
-             "extras_id": self.extras_id,
+             "id": self.id,
              "valor_extra": self.valor_extra,
              "nombre_extra": self.nombre_extra ,
          }
@@ -107,20 +119,28 @@ class Extras(db.Model):
 
 class Agendamiento(db.Model):
     __tablename__ = 'agendamiento'
-    agendamiento_id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
-    f_horarios_id = db.Column(db.Integer, db.ForeignKey('horarios.horarios_id'), nullable=False)
-    f_servicios_id = db.Column(db.Integer, db.ForeignKey('servicios.servicio_id'), nullable=False)
-    f_extras_id = db.Column(db.Integer, db.ForeignKey('extras.extras_id'), nullable=False)
-    f_users_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True) #Clave primaria de tabla
+    servicio = db.Column(db.String(200))
+    extra = db.Column(db.String(200))
+    fecha = db.Column(db.String(200))
+    hora = db.Column(db.String(200))
+    users_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     def serialize(self):
         return {
-            "agendamiento_id": self.agendamiento_id,
-            "f_horarios_id": self.f_horarios_id,
-            "f_servicios_id": self.f_servicios_id,
-            "f_extras_id": self.f_extras_id,
-            "f_users_id": self.f_users_id, 
+            "id": self.id,
+            "servicio": self.servicio,
+            "extra": self.extra,
+            "fecha": self.fecha,
+            "hora": self.hora,
          }
-
+    def serialize_with_user(self):
+        return {
+            "id": self.id,
+            "servicio": self.servicio,
+            "extra": self.extra,
+            "fecha": self.fecha,
+            "hora": self.hora,
+         }
     def save(self):
         db.session.add(self)
         db.session.commit()

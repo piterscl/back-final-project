@@ -6,7 +6,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-from models import db, User, Servicios, Horarios, Extras
+from models import db, User, Servicios, Horarios, Extras, Agendamiento
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -26,11 +26,11 @@ CORS(app)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
+
 @app.route("/")
 def main():
     return render_template('index.html')
 
-#Login
 @app.route("/Login", methods=['POST'])
 def login():
     username = request.json.get('username')
@@ -41,11 +41,10 @@ def login():
 
     user = User.query.filter_by(username=username).first()
     if not user: return jsonify({"msg": "username/contraseña incorrectos"}), 400
-    
 
     if not check_password_hash(user.password, password):
         return jsonify({"msg": "nombre/contraseña incorrectos"}), 400
-    
+
     expires = datetime.timedelta(days=1)
 
     access_token = create_access_token(identity=user.id, expires_delta=expires)
@@ -58,8 +57,9 @@ def login():
     return jsonify(data), 200
 
 #/Registro
-@app.route("/Registro", methods=['POST'])
+@app.route("/API/Registro", methods=['POST'])
 def register():
+    print(request.get_json())
     username = request.json.get('username')
     apellido = request.json.get('apellido')
     password = request.json.get('password')
@@ -74,7 +74,7 @@ def register():
 
     user = User.query.filter_by(email=email).first()
     if user: return jsonify({"msg": "el email ya se encuentra registrado"}), 400
-    
+
     user = User()
     user.username = username
     user.password = generate_password_hash(password)
@@ -96,7 +96,7 @@ def register():
 
     return jsonify(data), 200
 
-#/Profile
+#/PROFILE
 @app.route("/Profile", methods=['GET'])
 @jwt_required()
 def profile():
@@ -104,50 +104,60 @@ def profile():
     user = User.query.get(id)
     return jsonify(user.serialize()), 200
 
-#/Servicios
+#/SERVICIOS
 @app.route("/API/Servicios", methods=['POST'])
-def crearServicio():
-    servicio_id = request.json.get('servicio_id')
+def crearServicios():
+    id = request.json.get('id')
     nombre_servicio = request.json.get('nombre_servicio')
     valor_servicio = request.json.get('valor_servicio')
 
-    if not servicio_id: return jsonify({"msg": "id es requerido"}), 400
+    if not id: return jsonify({"msg": "id servicio es requerido"}), 400
     if not nombre_servicio: return jsonify({"msg": "nombre servicio es requerido"}), 400
-    if not valor_servicio: return jsonify({"msg": "valor servicio es requerido"}), 400
+    if not nombre_servicio: return jsonify({"msg": "valor servicio es requerido"}), 400
 
-    servicio = Servicios.query.filter_by(servicio_id=servicio_id).first()
-    if servicio: return jsonify({"msg": "el id ya se encuentra en uso"}), 400
+    servicios = Servicios.query.filter_by(id=id).first()
+    if servicios: return jsonify({"msg": "el id ya se encuentra en uso"}), 400
     
-    servicio = Servicios()  
-    servicio.servicio_id = servicio_id
-    servicio.nombre_servicio = nombre_servicio
-    servicio.valor_servicio = valor_servicio
-    servicio.save()
+    servicios = Servicios()  
+    servicios.id = id
+    servicios.nombre_servicio = nombre_servicio
+    servicios.valor_servicio = valor_servicio
+    servicios.save()
 
-    if not servicio: return jsonify({"msg": "Falló registro"}), 400
+    if not servicios: return jsonify({"msg": "Falló registro"}), 400
 
     data = {
-        "servicio": servicio.serialize()
+        "servicios": servicios.serialize()
     }
 
     return jsonify(data), 200
 
-#/Extras
+@app.route("/API/Servicios/<int:id>", methods=['GET'])
+def servicios(id = None):
+    if id is not None:
+        servicios = Servicios.query.get(id)
+        if not servicios: return jsonify({"msg": "Servicio not found"})
+        return jsonify(servicios.serialize()), 200
+    else:
+        servicios = Servicios.query.all()
+        servicios = list(map(lambda servicios: servicios.serialize, servicios))
+        return jsonify(servicios), 200
+#/EXTRAS
 @app.route("/API/Extras", methods=['POST'])
 def crearExtras():
-    extras_id = request.json.get('extras_id')
+    id = request.json.get('id')
     nombre_extra = request.json.get('nombre_extra')
     valor_extra = request.json.get('valor_extra')
 
-    if not extras_id: return jsonify({"msg": "id extra es requerido"}), 400
+    if not id: return jsonify({"msg": "id extra es requerido"}), 400
     if not nombre_extra: return jsonify({"msg": "nombre extra es requerido"}), 400
     if not valor_extra: return jsonify({"msg": "valor extra es requerido"}), 400
 
-    extra = Extras.query.filter_by(extras_id=extras_id).first()
+    extra = Extras.query.filter_by(id=id).first()
     if extra: return jsonify({"msg": "el id ya se encuentra en uso"}), 400
     
     extra = Extras()  
-    extra.extras_id = extras_id
+    extra.id = id
     extra.nombre_extra = nombre_extra
     extra.valor_extra = valor_extra
     extra.save()
@@ -160,8 +170,25 @@ def crearExtras():
 
     return jsonify(data), 200
 
-    #/Horarios
-@app.route("/API/Horarios", methods=['POST'])
+@app.route("/API/Extras/<int:id>", methods=['GET'])
+def extras(id = None):
+    if id is not None:
+        extra = Extras.query.get(id)
+        if not extra: return jsonify({"msg": "extra not found"})
+        return jsonify(extra.serialize()), 200
+    else:
+        extra = Extras.query.all()
+        extra = list(map(lambda extra: extra.serialize, extra))
+        return jsonify(extra), 200
+
+#/Extras
+@app.route("/Extras", methods=['GET'])
+def extra(id=None):
+    extra = Extras.query.get(id)
+    return jsonify(extra.serialize()), 200
+
+# /Horarios
+@app.route("/API/Horarios", methods=['POST', 'DELETE'])
 def crearHorarios():
     horarios_id = request.json.get('horarios_id')
     fechas = request.json.get('fechas')
@@ -187,7 +214,53 @@ def crearHorarios():
     }
 
     return jsonify(data), 200
+    
+    if request.method == 'DELETE':
+            horario = Horarios.query.get(id)
+            if not horario: return jsonify({"msg": "Horario not found"}), 404
+            horario.delete()
+            return jsonify({"result": "Horario has delete"}), 200    
 
+# Agendamiento
+@app.route("/API/Checkout", methods=['GET', 'POST'])
+@app.route("/API/Checkout/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def agendamientos(id = None):
+    if request.method == 'GET':
+        if id is not None:
+            agendamiento = Agendamiento.query.get(id)
+            if not agendamiento: return jsonify({"msg": "agendamiento not found"}), 404
+            return jsonify(user.serialize()), 200
+        else:
+            agendamiento = Agendamiento.query.all()
+            agendamiento = list(map(lambda agendamiento: agendamiento.serilize(), agendamientos))
+            return jsonify(agendamiento), 200
 
+    if request.method == 'POST':
+        servicio = request.json.get("servicio")
+        extra = request.json.get("extra")
+        fecha = request.json.get("fecha")
+        hora = request.json.get("hora")
+        users_id = request.json.get("users_id")
+
+        if not servicio: return jsonify({"msg": "servicio  is required"}), 400
+        if not extra: return jsonify({"msg": "extra is required"}), 400
+        if not fecha: return jsonify({"msg": "fecha is required"}), 400
+        if not hora: return jsonify({"msg": "hora is required"}), 400
+        if not users_id: return jsonify({"msg": "usuario is required"}), 400
+
+        agendamiento = Agendamiento.query.filter_by(id=id).first()
+        if agendamiento: return jsonify({"msg": "agendamiento ya existe"}), 400
+
+        agendamiento = Agendamiento()
+        agendamiento.servicio = servicio
+        agendamiento.extra = extra
+        agendamiento.fecha = fecha
+        agendamiento.hora = hora
+        agendamiento.users_id = users_id
+        agendamiento.save()
+
+        return jsonify(agendamiento.serialize()), 201
+
+    
 if __name__ == '__main__':
     manager.run()
