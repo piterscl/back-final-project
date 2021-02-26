@@ -31,7 +31,7 @@ manager.add_command('db', MigrateCommand)
 def main():
     return render_template('index.html')
 
-@app.route("/Login", methods=['POST'])
+@app.route("/API/Login", methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -97,12 +97,23 @@ def register():
     return jsonify(data), 200
 
 #/PROFILE
-@app.route("/Profile", methods=['GET'])
+@app.route("/API/Profile/", methods=['GET'])
 @jwt_required()
 def profile():
     id = get_jwt_identity()
     user = User.query.get(id)
     return jsonify(user.serialize()), 200
+
+@app.route("/API/Profile/<int:users_id>/", methods=['GET'])
+def serialize_with_servicio_extra(users_id, id = None):
+    if request.method == 'GET':
+            if id is not None:
+                agendamientos = Agendamiento.query.filter_by(users_id=users_id, id=id).first()
+                if not agendamientos: return jsonify({"msg": "Task not found"}), 404
+                return jsonify(agendamientos.serialize()), 200
+            else:
+                user = User.query.get(users_id)
+                return jsonify(user.serialize_with_servicio_extra()), 200
 
 #/SERVICIOS
 @app.route("/API/Servicios", methods=['POST'])
@@ -142,6 +153,7 @@ def servicios(id = None):
         servicios = Servicios.query.all()
         servicios = list(map(lambda servicios: servicios.serialize, servicios))
         return jsonify(servicios), 200
+
 #/EXTRAS
 @app.route("/API/Extras", methods=['POST'])
 def crearExtras():
@@ -171,15 +183,17 @@ def crearExtras():
     return jsonify(data), 200
 
 @app.route("/API/Extras/<int:id>", methods=['GET'])
+@app.route("/API/Extras/<int:id>", methods=['GET','PUT'])
 def extras(id = None):
-    if id is not None:
-        extra = Extras.query.get(id)
-        if not extra: return jsonify({"msg": "extra not found"})
-        return jsonify(extra.serialize()), 200
-    else:
-        extra = Extras.query.all()
-        extra = list(map(lambda extra: extra.serialize, extra))
-        return jsonify(extra), 200
+    if request.method == 'GET':
+        if id is not None:
+            extra = Extras.query.get(id)
+            if not extra: return jsonify({"msg": "extra not found"}), 404
+            return jsonify(extra.serialize()), 200
+        else:
+            extras = Extras.query.all()
+            extras = list(map(lambda extra: extra.serialize(), extras))
+            return jsonify(extras), 200
 
 #/Extras
 @app.route("/Extras", methods=['GET'])
@@ -188,6 +202,7 @@ def extra(id=None):
     return jsonify(extra.serialize()), 200
 
 # /Horarios
+
 @app.route("/API/Horarios", methods=['POST', 'DELETE'])
 def crearHorarios():
     horarios_id = request.json.get('horarios_id')
@@ -229,7 +244,7 @@ def agendamientos(id = None):
         if id is not None:
             agendamiento = Agendamiento.query.get(id)
             if not agendamiento: return jsonify({"msg": "agendamiento not found"}), 404
-            return jsonify(user.serialize()), 200
+            return jsonify(agendamiento.serialize()), 200
         else:
             agendamiento = Agendamiento.query.all()
             agendamiento = list(map(lambda agendamiento: agendamiento.serilize(), agendamientos))
@@ -261,6 +276,53 @@ def agendamientos(id = None):
 
         return jsonify(agendamiento.serialize()), 201
 
-    
+"""
+####EXTRAS 2
+@app.route("/API/extras_2", methods=['GET', 'POST'])
+@app.route("/API/extras_2/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def extras(id = None):
+    if request.method == 'GET':
+        if id is not None:
+            extra = Extras.query.get(id)
+            if not extra: return jsonify({"msg": "Extra not found"}), 404
+            return jsonify(extras), 200
+        else:
+            extras = Extra.query.all()
+            extras = list(map(lambda extra: extra.serialize(), extras))
+            return jsonify(extras), 200
+
+        if request.method == 'POST':
+            nombre = request.json.get("nombre")
+            valor = request.json.get("valor")
+
+            if not nombre: return jsonify({"msg": "nombre es requerido"}), 400
+            if not valor: return jsonify({"msg": "valor es requerido"}), 400
+
+            extra = Extra()
+            extra.nombre = nombre
+            extra.valor = valor
+            extra.save()
+
+            return jsonify(extra.serialize()), 201
+
+        if request.method == 'PUT':
+            nombre = request.json.get("nombre")
+            valor = request.json.get("valor")
+
+            extra = Extra()
+            if nombre: extra.nombre = nombre
+            if valor: extra.valor = valor
+            extra.update()
+
+            return jsonify(extra.serialize()), 200
+
+        if request.method == 'DELETE':
+            extra = Extra.query.get(id)
+            if not extra: return jsonify({"msg": "Extra no entonctrado"}), 404
+            extra.delete()
+            return jsonify(extra.serialize()), 200
+            return jsonify({"resultado": "Extra eliminado"}), 404
+"""
+
 if __name__ == '__main__':
     manager.run()

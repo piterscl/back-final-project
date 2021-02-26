@@ -103,7 +103,7 @@ class Extras(db.Model):
          return {
              "id": self.id,
              "valor_extra": self.valor_extra,
-             "nombre_extra": self.nombre_extra ,
+             "nombre_extra": self.nombre_extra,
          }
 
     def save(self):
