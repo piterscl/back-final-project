@@ -59,7 +59,7 @@ def login():
 #/Registro
 @app.route("/API/Registro", methods=['POST'])
 def register():
-    print(request.get_json())
+    print(request.get_json()) ##ESTÁ LÍNEA QUÉ HACER
     username = request.json.get('username')
     apellido = request.json.get('apellido')
     password = request.json.get('password')
@@ -276,53 +276,6 @@ def agendamientos(id = None):
 
         return jsonify(agendamiento.serialize()), 201
 
-"""
-####EXTRAS 2
-@app.route("/API/extras_2", methods=['GET', 'POST'])
-@app.route("/API/extras_2/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-def extras(id = None):
-    if request.method == 'GET':
-        if id is not None:
-            extra = Extras.query.get(id)
-            if not extra: return jsonify({"msg": "Extra not found"}), 404
-            return jsonify(extras), 200
-        else:
-            extras = Extra.query.all()
-            extras = list(map(lambda extra: extra.serialize(), extras))
-            return jsonify(extras), 200
-
-        if request.method == 'POST':
-            nombre = request.json.get("nombre")
-            valor = request.json.get("valor")
-
-            if not nombre: return jsonify({"msg": "nombre es requerido"}), 400
-            if not valor: return jsonify({"msg": "valor es requerido"}), 400
-
-            extra = Extra()
-            extra.nombre = nombre
-            extra.valor = valor
-            extra.save()
-
-            return jsonify(extra.serialize()), 201
-
-        if request.method == 'PUT':
-            nombre = request.json.get("nombre")
-            valor = request.json.get("valor")
-
-            extra = Extra()
-            if nombre: extra.nombre = nombre
-            if valor: extra.valor = valor
-            extra.update()
-
-            return jsonify(extra.serialize()), 200
-
-        if request.method == 'DELETE':
-            extra = Extra.query.get(id)
-            if not extra: return jsonify({"msg": "Extra no entonctrado"}), 404
-            extra.delete()
-            return jsonify(extra.serialize()), 200
-            return jsonify({"resultado": "Extra eliminado"}), 404
-"""
 
 if __name__ == '__main__':
     manager.run()
