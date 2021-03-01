@@ -1,10 +1,12 @@
 import os
 import datetime
+import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, jsonify
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 from models import db, User, Servicios, Horarios, Extras, Agendamiento
 from dotenv import load_dotenv
@@ -185,21 +187,28 @@ def crearExtras():
 @app.route("/API/Extras/<int:id>", methods=['GET'])
 @app.route("/API/Extras/<int:id>", methods=['GET','PUT'])
 def extras(id = None):
+    print("aaaaaaaaaaaaaaaaaaaaaaaaasasasasasa");
     if request.method == 'GET':
         if id is not None:
             extra = Extras.query.get(id)
             if not extra: return jsonify({"msg": "extra not found"}), 404
             return jsonify(extra.serialize()), 200
-        else:
+            print("a");
+        """ else:
+            print("b");
             extras = Extras.query.all()
-            extras = list(map(lambda extra: extra.serialize(), extras))
-            return jsonify(extras), 200
+            extras = list(map(lambda extras: extras.get_extras(), extras))
+            return jsonify(extras), 200 """
 
 #/Extras
-@app.route("/Extras", methods=['GET'])
-def extra(id=None):
-    extra = Extras.query.get(id)
-    return jsonify(extra.serialize()), 200
+@app.route("/API/Extras", methods=['GET'])
+def index():
+        lista1 = []
+        extras = Extras.query.all()
+        print(extras)
+        data1 = json.dumps(extras)
+        print(data1)
+        return jsonify({'extras': outout}), 200
 
 # /Horarios
 

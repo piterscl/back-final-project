@@ -106,6 +106,12 @@ class Extras(db.Model):
              "nombre_extra": self.nombre_extra,
          }
 
+    def get_extras(self):
+        return list(map(lambda extras: extras.serialize, self.extras))
+
+    """ def get_agendamiento(self):
+        return list(map(lambda agendamiento: agendamiento.serialize, self.agendamiento)) """
+
     def save(self):
         db.session.add(self)
         db.session.commit()
